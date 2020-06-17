@@ -1,0 +1,6 @@
+[submodule "tellme-server"]
+	path = tellme-server
+	url = https://github.com/ken90242/tellme-server.git
+[submodule "tellme-client"]
+	path = tellme-client
+	url = https://github.com/ken90242/tellme-client.git

@@ -1,0 +1,76 @@
+version: '2'
+
+networks:
+  tellme-net:
+
+services:
+  tellme-server:
+    build: tellme-server
+    networks:
+      - tellme-net
+    depends_on:
+      - db
+      - elasticsearch
+      - redis
+    ports:
+      - "8888:8888"
+
+  elasticsearch:  
+    image: elasticsearch:2.4.6
+    networks:
+      - tellme-net
+    ports:
+      - "9200:9200"
+
+  daphne:
+    build: tellme-daphne
+    networks:
+      - tellme-net
+    depends_on:
+      - db
+      - redis
+    ports:
+      - "8000:8000"
+
+  redis:
+    image: redis
+    networks:
+      - tellme-net
+    ports:
+      - "6379:6379"
+
+  nginx:
+    build: tellme-nginx
+    networks:
+      - tellme-net
+    depends_on:
+      - tellme-server
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./tellme-nginx/data/certbot/conf:/etc/letsencrypt
+      - ./tellme-nginx/data/certbot/www:/var/www/certbot
+      - ./tellme-nginx/data/web:/var/www/web
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+
+  db:
+    image: "mysql:5.7.30"
+    networks:
+      - tellme-net
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: tellme
+      MYSQL_PASSWORD: tellme
+    volumes:
+      - ./data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./tellme-nginx/data/certbot/conf:/etc/letsencrypt
+      - ./tellme-nginx/data/certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
