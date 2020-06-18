@@ -18,7 +18,7 @@ if [ ! -f $PWD/tellme-server/tellme/settings.py ] || [ ! -d $PWD/tellme-server/s
   read -s password
   
   # (encrypted) zip -re <target> <files...> (decrypted) unzip -P <password> file.zip
-  if sudo unzip -P asdasd bunch.zip 2>&1 > /dev/null |  grep -q 'incorrect'; then
+  if sudo unzip -P $password bunch.zip 2>&1 > /dev/null |  grep -q 'incorrect'; then
     echo ""
     echo "Incorrect password."
     exit 1
