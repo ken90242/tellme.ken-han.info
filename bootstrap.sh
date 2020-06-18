@@ -68,24 +68,22 @@ sudo systemctl start docker
 # [DB]
 sudo rm -rf $PWD/data/*
 sudo docker-compose up -d db
-echo -n "Sleeping 5s to wait for mysqld start ... "
-sleep 5
+echo -n "Sleeping 1 min to wait for mysqld start ... "
+sleep 60
 echo "done"
 sudo cp backup.sql data/
 echo -n "Sleeping 5s to wait for mysqld response ... "
 sleep 5
 echo "done"
-sudo docker-compose exec db sh -c 'mysql -uroot -proot -h 127.0.0.1 -P 3306 -e "create database tellme"'
+sudo docker-compose exec db sh -c 'mysql --host 127.0.0.1 --port 3306 -uroot -proot -e "create database tellme"'
 echo -n "Sleeping 5s to wait for mysqld response ... "
 sleep 5
 echo "done"
-sudo docker-compose exec db sh -c 'mysql -uroot -proot -h 127.0.0.1 -P 3306 tellme < /var/lib/mysql/backup.sql'
-sudo docker-compose stop db
+sudo docker-compose exec db sh -c 'mysql --host 127.0.0.1 --port 3306 -uroot -proot tellme < /var/lib/mysql/backup.sql'
 
 
 # [elasticsearch setting]
 sudo docker-compose build tellme-server
-sudo docker-compose up -d db
 sudo docker-compose up -d tellme-server
 echo -n "Sleeping 5s to wait for mysqld start ... "
 sleep 5
