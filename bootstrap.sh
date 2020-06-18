@@ -7,44 +7,29 @@ sudo yum install -y unzip
 git submodule init
 git submodule update
 
-echo "Please input your enctyped file's password (<your birthday>-<your graduate university>-<your personal password>)":
-echo -n "example: 880314-nyu-axxxxxxx6: "
-read -s password
-
-# (encrypted) zip -e <target> <files...> (decrypted) unzip -P <password> file.zip
-if sudo unzip -P asdasd bunch.zip 2>&1 > /dev/null |  grep -q 'incorrect'; then
-  echo ""
-  echo "Incorrect password."
-  exit 1
-fi
-sudo mv media/ tellme-server/
-sudo mv static/ tellme-server/
-sudo mv settings.py tellme-server/tellme/
-
 
 mkdir -p data
 mkdir -p tellme-nginx/data
 
 # [settings.py]
-if [ ! -f $PWD/tellme-server/tellme/settings.py ]; then
-  echo "Please download your settings.py file, then put it under tellme-server/tellme/."
-  exit 1
+if [ ! -f $PWD/tellme-server/tellme/settings.py ] || [ ! -d $PWD/tellme-server/static ] || [ ! -d $PWD/tellme-server/media ]; then
+  echo "Please input your enctyped file's password (<your birthday>-<your graduate university>-<your personal password>)":
+  echo -n "example: 880314-nyu-axxxxxxx6: "
+  read -s password
+  
+  # (encrypted) zip -e <target> <files...> (decrypted) unzip -P <password> file.zip
+  if sudo unzip -P asdasd bunch.zip 2>&1 > /dev/null |  grep -q 'incorrect'; then
+    echo ""
+    echo "Incorrect password."
+    exit 1
+  fi
+  sudo mv media/ tellme-server/
+  sudo mv static/ tellme-server/
+  sudo mv settings.py tellme-server/tellme/
 fi
-
-if [ ! -d $PWD/tellme-server/static ]; then
-  echo "Please download your static files, then put them under tellme-server/static/."
-  exit 1
-fi
-
-if [ ! -d $PWD/tellme-server/media ]; then
-  echo "Please download your media files, then put them under tellme-server/media/."
-  exit 1
-fi
-
 
 # [Websocket]
 sudo cp -r $PWD/tellme-server/ $PWD/tellme-daphne/
-
 
 # [node + yarn]
 if [ ! -x /usr/bin/yarn ]; then
@@ -104,7 +89,7 @@ sudo docker-compose up -d tellme-server
 echo -n "Sleeping 5s to wait for mysqld start ... "
 sleep 5
 echo "done"
-sudo docker-compose exec tellme-server sh -c 'python3 manage.py migrate'
+#sudo docker-compose exec tellme-server sh -c 'python3 manage.py migrate'
 sudo docker-compose exec tellme-server sh -c 'python3 manage.py rebuild_index'
 sudo docker-compose stop tellme-server
 sudo docker-compose stop db
