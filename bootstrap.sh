@@ -12,7 +12,11 @@ echo -n "example: 880314-nyu-axxxxxxx6: "
 read -s password
 
 # (encrypted) zip -e <target> <files...> (decrypted) unzip -P <password> file.zip
-sudo unzip -P $password bunch.zip
+if sudo unzip -P asdasd bunch.zip 2>&1 > /dev/null |  grep -q 'incorrect'; then
+  echo ""
+  echo "Incorrect password."
+  exit 1
+fi
 sudo mv media/ tellme-server/
 sudo mv static/ tellme-server/
 sudo mv settings.py tellme-server/tellme/
