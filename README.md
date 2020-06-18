@@ -12,4 +12,5 @@
 7. type command: `sudo echo "LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8" > /etc/environment`
 8. turn off SELinux
 9. `sudo sh ./bootstrap.sh`, type `yes` for any prompt popping up.
+10. It usually takes around 20 - 30 minutes to set up, if you respond to any prompt in time correctly.
 

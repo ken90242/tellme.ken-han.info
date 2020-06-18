@@ -5,3 +5,6 @@ tellme-server/media/
 tellme-server/static/
 tellme-server/tellme/settings.py
 *.lock
+media/
+settings.py
+static/
