@@ -10,6 +10,6 @@
 5. Login with private key & its owner name, like `ssh-rsa ... <username>`
 6. sudo yum install -y git
 7. type command: `sudo echo "LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8" > /etc/environment`
-(8. Download settings.py, media/, static/, and upload them to the server directories)
+8. turn off SELinux
 9. `sudo sh ./bootstrap.sh`, type `yes` for any prompt popping up.
 

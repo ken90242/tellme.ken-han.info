@@ -31,20 +31,20 @@ sudo cp -r $PWD/tellme-server/ $PWD/tellme-daphne/
 
 
 # [node + yarn]
-if [ -x /usr/bin/yarn ]; then
-  # build front-end pages
-  cd $PWD/tellme-client
-  sudo rm -rf $PWD/tellme-client/node_modules 
-  yarn install
-  yarn build
-  cd ..
-  sudo mkdir -p $PWD/tellme-nginx/data/web
-  sudo cp -r $PWD/tellme-client/build/* $PWD/tellme-nginx/data/web
-else
+if [ ! -x /usr/bin/yarn ]; then
   curl --silent --location https://dl.yarnpkg.com/rpm/yarn.repo | sudo tee /etc/yum.repos.d/yarn.repo
   curl --silent --location https://rpm.nodesource.com/setup_8.x | sudo bash -
   sudo yum install yarn
 fi
+
+# build front-end pages
+cd $PWD/tellme-client
+sudo rm -rf $PWD/tellme-client/node_modules 
+yarn install
+yarn build
+cd ..
+sudo mkdir -p $PWD/tellme-nginx/data/web
+sudo cp -r $PWD/tellme-client/build/* $PWD/tellme-nginx/data/web
 
 
 # [docker]
@@ -66,21 +66,20 @@ sudo systemctl start docker
 
 
 # [DB]
-sudo docker-compose build db
 sudo rm -rf $PWD/data/*
 sudo docker-compose up -d db
 echo -n "Sleeping 5s to wait for mysqld start ... "
 sleep 5
-echo "OK"
+echo "done"
 sudo cp backup.sql data/
 echo -n "Sleeping 5s to wait for mysqld response ... "
 sleep 5
-echo "OK"
-sudo docker-compose exec db sh -c 'mysql -uroot -proot -e "create database tellme"'
+echo "done"
+sudo docker-compose exec db sh -c 'mysql -uroot -proot -h 127.0.0.1 -P 3306 -e "create database tellme"'
 echo -n "Sleeping 5s to wait for mysqld response ... "
 sleep 5
-echo "OK"
-sudo docker-compose exec db sh -c 'mysql -uroot -proot tellme < /var/lib/mysql/backup.sql'
+echo "done"
+sudo docker-compose exec db sh -c 'mysql -uroot -proot -h 127.0.0.1 -P 3306 tellme < /var/lib/mysql/backup.sql'
 sudo docker-compose stop db
 
 
@@ -90,7 +89,7 @@ sudo docker-compose up -d db
 sudo docker-compose up -d tellme-server
 echo -n "Sleeping 5s to wait for mysqld start ... "
 sleep 5
-echo "OK"
+echo "done"
 sudo docker-compose exec tellme-server sh -c 'python3 manage.py migrate'
 sudo docker-compose exec tellme-server sh -c 'python3 manage.py rebuild_index'
 sudo docker-compose stop tellme-server
