@@ -113,6 +113,7 @@ if [ ! -f $PWD/tellme-nginx/data/certbot/conf/live/tellme.ken-han.info/cert.pem 
   sudo docker-compose rm
   sudo docker-compose build
   echo 'Please run the command to obtain a SSL certificate: "sudo ./init-letsencrypt.sh"'
+  echo '[Reminder] Please go to DNS provider to modify your ip address first: https://dcc.godaddy.com/manage/ken-han.info'
   exit
 else
   echo "Find SSL certification."
@@ -120,9 +121,17 @@ else
 fi
 
 # [Stop possible service]
-sudo systemctl stop redis
-sudo systemctl stop nginx
-sudo systemctl stop mysqld
+if service --status-all | grep -Fq 'redis'; then
+  sudo systemctl stop redis
+fi
+
+if service --status-all | grep -Fq 'nginx'; then
+  sudo systemctl stop nginx
+fi
+
+if service --status-all | grep -Fq 'mysqld'; then
+  sudo systemctl stop mysqld
+fi
 
 
 ## [Start services]
