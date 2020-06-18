@@ -3,8 +3,20 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
+sudo yum install -y unzip
 git submodule init
 git submodule update
+
+echo "Please input your enctyped file's password (<your birthday>-<your graduate university>-<your personal password>)":
+echo -n "example: 880314-nyu-axxxxxxx6: "
+read -s password
+
+# (encrypted) zip -e <target> <files...> (decrypted) unzip -P <password> file.zip
+sudo unzip -P $password bunch.zip
+sudo mv media/ tellme-server/
+sudo mv static/ tellme-server/
+sudo mv settings.py tellme-server/tellme/
+
 
 mkdir -p data
 mkdir -p tellme-nginx/data
