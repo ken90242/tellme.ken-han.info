@@ -1,74 +1,101 @@
-git submodule init
-git submodule update
-
 if [ "$EUID" -ne 0 ]
   then echo 'Please run as root: "sudo sh ./bootstrap.sh"'
   exit
 fi
+
+git submodule init
+git submodule update
 
 mkdir -p data
 mkdir -p tellme-nginx/data
 
 # [settings.py]
 if [ ! -f $PWD/tellme-server/tellme/settings.py ]; then
-  echo "Please download your setting file."
+  echo "Please download your settings.py file, then put it under tellme-server/tellme/."
   exit 1
 fi
 
 if [ ! -d $PWD/tellme-server/static ]; then
-  echo "Please download your static files."
+  echo "Please download your static files, then put them under tellme-server/static/."
   exit 1
 fi
 
 if [ ! -d $PWD/tellme-server/media ]; then
-  echo "Please download your media files."
+  echo "Please download your media files, then put them under tellme-server/media/."
   exit 1
 fi
 
-## [Websocket]
+
+# [Websocket]
 sudo cp -r $PWD/tellme-server/ $PWD/tellme-daphne/
 
+
 # [node + yarn]
-if [ command -v yarn >/dev/null 2>&1 ]; then
+if [ -x /usr/bin/yarn ]; then
+  # build front-end pages
+  cd $PWD/tellme-client
+  sudo rm -rf $PWD/tellme-client/node_modules 
+  yarn install
+  yarn build
+  cd ..
+  sudo mkdir -p $PWD/tellme-nginx/data/web
+  sudo cp -r $PWD/tellme-client/build/* $PWD/tellme-nginx/data/web
+else
   curl --silent --location https://dl.yarnpkg.com/rpm/yarn.repo | sudo tee /etc/yum.repos.d/yarn.repo
   curl --silent --location https://rpm.nodesource.com/setup_8.x | sudo bash -
   sudo yum install yarn
 fi
 
-# [Front-end]
-cd $PWD/tellme-client
-sudo rm -rf $PWD/tellme-client/node_modules 
-yarn install
-yarn build
-sudo mkdir -p $PWD/tellme-nginx/data/web
-sudo cp -r $PWD/tellme-client/build/* $PWD/tellme-nginx/data/web
 
-# [Docker + Compose]
-if [ command -v docker >/dev/null 2>&1 ]; then
+# [docker]
+if [ ! -x /usr/bin/docker ]; then
   sudo yum install -y yum-utils
   sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
   sudo yum install docker-ce docker-ce-cli containerd.io
 fi
 
-if [ command -v docker-compose >/dev/null 2>&1 ]; then
+# [docker-compose]
+if [ ! -x /usr/bin/docker-compose ] && [ ! -x /usr/local/bin/docker-compose ]; then
   sudo curl -L "https://github.com/docker/compose/releases/download/1.26.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
   sudo chmod +x /usr/local/bin/docker-compose
   sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 fi
 
+# Start docker service
+sudo systemctl start docker
+
+
+# [DB]
+sudo docker-compose build db
+sudo rm -rf $PWD/data/*
+sudo docker-compose up -d db
+echo -n "Sleeping 5s to wait for mysqld start ... "
+sleep 5
+echo "OK"
+sudo cp backup.sql data/
+echo -n "Sleeping 5s to wait for mysqld response ... "
+sleep 5
+echo "OK"
+sudo docker-compose exec db sh -c 'mysql -uroot -proot -e "create database tellme"'
+echo -n "Sleeping 5s to wait for mysqld response ... "
+sleep 5
+echo "OK"
+sudo docker-compose exec db sh -c 'mysql -uroot -proot tellme < /var/lib/mysql/backup.sql'
+sudo docker-compose stop db
+
+
 # [elasticsearch setting]
+sudo docker-compose build tellme-server
+sudo docker-compose up -d db
 sudo docker-compose up -d tellme-server
+echo -n "Sleeping 5s to wait for mysqld start ... "
+sleep 5
+echo "OK"
 sudo docker-compose exec tellme-server sh -c 'python3 manage.py migrate'
 sudo docker-compose exec tellme-server sh -c 'python3 manage.py rebuild_index'
 sudo docker-compose stop tellme-server
-
-
-## [DB]
-sudo docker-compose up -d db
-sudo cp backup.sql data/
-sudo docker-compose exec db sh -c 'mysql -uroot -proot -e "create database tellme"'
-sudo docker-compose exec db sh -c 'mysql -uroot -proot tellme < /var/lib/mysql/backup.sql'
 sudo docker-compose stop db
+
 
 # [SSL]
 if [ ! -f $PWD/tellme-nginx/data/certbot/conf/live/tellme.ken-han.info/cert.pem ]; then
@@ -90,7 +117,6 @@ sudo systemctl stop mysqld
 
 
 ## [Start services]
-sudo systemctl start docker
 sudo docker-compose down
 sudo docker-compose rm
 sudo docker-compose build
