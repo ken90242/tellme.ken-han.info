@@ -1,3 +1,7 @@
 tellme-daphne/tellme-server/
 data/
 tellme-nginx/data/
+tellme-server/media/
+tellme-server/static/
+tellme-server/tellme/settings.py
+*.lock
