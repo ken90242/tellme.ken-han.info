@@ -19,7 +19,7 @@ ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDcA6iMgcRG1JD83+Dthea9XSi+jHIynJmxR233dpqx
 8. turn off SELinux
 9. Clone this project: `git clone https://github.com/ken90242/tellme.ken-han.info.git`
 10. Type `tmux` to keep process running even unconnected
-11. `sudo sh ./bootstrap.sh`, type `yes` for any prompt popping up.
+11. `cd tellme.ken-han.info && sudo sh ./bootstrap.sh`, type `yes` for any prompt popping up.
 12. It usually takes around 20 - 30 minutes to set up, if you respond to any prompt in time correctly.
 ---
 ### GCP
