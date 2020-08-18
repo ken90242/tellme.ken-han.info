@@ -7,7 +7,8 @@
 3. Firewall: allow HTTP, HTTPS traffics
 4. Add ssh key in VM instance edit page (under security tab)
 ---
-5. Login with private key & its owner name, like `ssh-rsa ... <username>`
+5. Login with private key & its owner name, like `ssh -i <pem file> <username>@<ip address>` 
+(username depends on ssh key you added: `ssh-rsa ... <username>`)
 6. `sudo yum install -y git tmux htop`
 7. type command: `sudo echo "LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8" > /etc/environment`
 8. turn off SELinux
