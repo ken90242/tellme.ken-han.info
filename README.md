@@ -20,4 +20,6 @@ ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDcA6iMgcRG1JD83+Dthea9XSi+jHIynJmxR233dpqx
 9. Clone this project: `git clone https://github.com/ken90242/tellme.ken-han.info.git`
 10. `sudo sh ./bootstrap.sh`, type `yes` for any prompt popping up.
 11. It usually takes around 20 - 30 minutes to set up, if you respond to any prompt in time correctly.
-
+---
+### GCP
+(optional) Network - VPC network - External IP addresses to reserve a static ip address
