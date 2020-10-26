@@ -131,7 +131,7 @@ sudo docker-compose up
 
 ## Auto set-up sever when starting it
 echo "sudo systemctl start docker" | sudo tee -a /etc/rc.d/rc.local
-echo "cd tellme.ken-han.info && sudo docker-compose up" | sudo tee -a /etc/rc.d/rc.local
+echo "cd $HOME/tellme.ken-han.info && sudo docker-compose up" | sudo tee -a /etc/rc.d/rc.local
 sudo chmod a+x /etc/rc.d/rc.local
 
 
